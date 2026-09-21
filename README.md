@@ -36,3 +36,23 @@ Decisión Técnica — Modo de Direccionamiento Inmediato vs. Directo a Memoria
 Al comparar el direccionamiento inmediato con el direccionamiento directo a memoria, aunque ambas ocupen 3 bytes la que requiere un ciclo adicional de acceso al bus de memoria es la que va directo a memoria. Con el direccionamiento inmediato el dato ya esta en la instruccion. En cambio con la segunda, viaja es la dirección, por lo cual el procesador debe hacer un segundo acceso al bus para obtener el dato.
 Es preferible el direccionamiento directo cuando el dato puede cambiar en la ejecución del programa ya que con el inmediato el valor queda fijo en el momento de ensamblar, asi si se debe cambiar el dato no se debe reescribir la instrucción.
 El comando U permite confirmarlo porque traduce los bytes almacenados sin ejecutar ninguna instrucción. En la salida se observa que la primera codificación es B8 05 00 y se desensambla como MOV AX,0005, mientras que la segunda es A1 00 03 y se desensambla como MOV AX,[0300]. El opcode distinto y los corchetes en el operando identifican cada modo de direccionamiento.
+
+
+PARTE 2 — Ensamblado y ejecución paso a paso
+Checkpoint 1 — Traza del programa de suma
+
+Checkpoint 2 — Traza del bucle con LOOP
+
+Capturas: capturas/CP2_traza_loop.png y capturas/CP2_traza_loop_2.png
+
+Análisis del Código Máquina con D
+
+Decisión Técnica — Selección de Mecanismo de Control de Bucle (LOOP vs. DEC/JNZ)
+
+Checkpoint 3 — Traza del bucle con DEC y JNZ
+
+Demostración con el comando G
+
+Decisión Técnica — Comando de Verificación para Bucles de Muchas Iteraciones (T vs. G)
+
+Conclusiones
