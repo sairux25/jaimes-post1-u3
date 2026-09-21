@@ -39,13 +39,50 @@ El comando U permite confirmarlo porque traduce los bytes almacenados sin ejecut
 
 
 PARTE 2 — Ensamblado y ejecución paso a paso
+
 Checkpoint 1 — Traza del programa de suma
+Captura: capturas/CP1_traza_suma.png
+
+| Instrucción | AX | BX | CX | IP siguiente | ZF | CF | SF |
+|---|---|---|---|---|---|---|---|
+| MOV AX, 000A |000A|0000|0000|0103|NZ|NC|PL|
+| MOV BX, 0005 |000A|0005|0000|0106|NZ|NC|PL|
+| MOV CX, 0003 |000A|0005|0003|0109|NZ|NC|PL|
+| ADD AX, BX |000F|0005|0003|010B|NZ|NC|PL|
+| ADD AX, CX |0012|0005|0003|010D|NZ|NC|PL|
 
 Checkpoint 2 — Traza del bucle con LOOP
-
 Capturas: capturas/CP2_traza_loop.png y capturas/CP2_traza_loop_2.png
 
+| Iteración | Instrucción | AX después | CX después | IP siguiente | ¿LOOP salta? |
+|---|---|---|---|---|---|
+| — | MOV AX, 0000 |0000|0003|0103| — |
+| — | MOV CX, 0004 |0000|0004|0106| — |
+| 1 | ADD AX, 0002 |0002|0004|0109| — |
+| 1 | LOOP 0106 |0002|0003|0106|Sí|
+| 2 | ADD AX, 0002 |0004|0003|0109| — |
+| 2 | LOOP 0106 |0004|0002|0106|Sí|
+| 3 | ADD AX, 0002 |0006|0002|0109| — |
+| 3 | LOOP 0106 |0006|0001|0106|Sí|
+| 4 | ADD AX, 0002 |0008|0001|0109| — |
+| 4 | LOOP 0106 |0008|0000|010B|No|
+| — | INT 20 |0008|0000| — | — |
+
+Observaciones. La traza se dividió en dos capturas porque la pantalla del DOS es de veinticinco líneas. En la primera fila CX aparece en 0003 por residuo de la sesión anterior y solo toma el valor 0004 tras la segunda instrucción. BX permanece en 0005 durante todo el recorrido porque este programa nunca lo modifica. Mientras el bucle está activo el IP alterna entre 0109 y 0106, y cuando CX llega a cero continúa hacia 010B en lugar de regresar, lo que evidencia que LOOP dejó de saltar. El resultado final es AX igual a 0008.
+
 Análisis del Código Máquina con D
+El volcado con D sobre la región de código muestra los trece bytes que componen el programa del bucle.
+
+| Instrucción | Bytes | Tamaño |
+|---|---|---|
+| MOV AX,0000 | B8 00 00 | 3 |
+| MOV CX,0004 | B9 04 00 | 3 |
+| ADD AX,+02 | 83 C0 02 | 3 |
+| LOOPW 0106 | E2 FB | 2 |
+| INT 20 | CD 20 | 2 |
+
+El byte E2 es el opcode de LOOP y FB es el desplazamiento relativo con signo. El valor corresponde a menos cinco en complemento a dos, calculado desde la dirección siguiente al LOOP, que es 010B, hasta el inicio del cuerpo del bucle en 0106.
+isis del Código Máquina con D
 
 Decisión Técnica — Selección de Mecanismo de Control de Bucle (LOOP vs. DEC/JNZ)
 
