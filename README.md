@@ -24,3 +24,15 @@ Captura: capturas/CP3_ensamblado_desensamblado.png
 Observación. La instrucción ADD AX,BX se codificó como 01 D8 en lugar de 03 C3. Ambas codificaciones son válidas y equivalentes en el 8086, la diferencia está en cuál campo del byte ModRM actúa como destino. El desensamblado con U confirma que la instrucción resultante es la esperada y que ocupa los mismos dos bytes.
 
 Checkpoint 4 — Modificación de memoria y direccionamiento directo
+Captura: capturas/CP4_memoria_direccionamiento.png
+La secuencia F 300 L10 00 dejó la región en ceros, E 300 78 56 escribió dos bytes puntuales y el volcado posterior confirmó que los catorce bytes restantes permanecieron sin cambio. Leídos en little-endian, los dos bytes escritos representan el valor 5678.
+
+La instrucción MOV AX,[0300] se ensambló en 0320 para no sobrescribir el programa del paso anterior y se codificó como A1 00 03. Tras restablecer el IP a 0320 y ejecutar T, el registro AX quedó en 5678, lo que confirma la lectura del valor previamente escrito con E.
+ 
+Decisión Técnica — Verificación No Destructiva de una Escritura en Memoria
+El comando correcto para confirmar la escritura del Paso 11 es D. Este comando lee la memoria y la imprime sin alterarla, lo que resulta adecuado porque una verificación que cambie el estado dejaría de verificar el estado original. El comando E no una opción porque su función es escribir y al invocarlo sin la lista de bytes entra en modo interactivo, donde cualquier tecla presionada por error sobrescribiría el valor que se intenta comprobar. El comando F opera sobre un rango igual que D, pero su función es rellenar repitiendo un patrón, por lo que destruiría el contenido que se desea verificar. El comando R tampoco es una opción, porque actúa sobre los registros del procesador y no sobre la memoria, de modo que no puede observar la dirección 0300, y además con un argumento permite modificar el registro indicado. 
+
+Decisión Técnica — Modo de Direccionamiento Inmediato vs. Directo a Memoria
+Al comparar el direccionamiento inmediato con el direccionamiento directo a memoria, aunque ambas ocupen 3 bytes la que requiere un ciclo adicional de acceso al bus de memoria es la que va directo a memoria. Con el direccionamiento inmediato el dato ya esta en la instruccion. En cambio con la segunda, viaja es la dirección, por lo cual el procesador debe hacer un segundo acceso al bus para obtener el dato.
+Es preferible el direccionamiento directo cuando el dato puede cambiar en la ejecución del programa ya que con el inmediato el valor queda fijo en el momento de ensamblar, asi si se debe cambiar el dato no se debe reescribir la instrucción.
+El comando U permite confirmarlo porque traduce los bytes almacenados sin ejecutar ninguna instrucción. En la salida se observa que la primera codificación es B8 05 00 y se desensambla como MOV AX,0005, mientras que la segunda es A1 00 03 y se desensambla como MOV AX,[0300]. El opcode distinto y los corchetes en el operando identifican cada modo de direccionamiento.
